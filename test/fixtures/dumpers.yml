@@ -1,0 +1,27 @@
+# Read about fixtures at https://api.rubyonrails.org/classes/ActiveRecord/FixtureSet.html
+
+one:
+  make: MyString
+  model: MyString
+  slno: MyString
+  location: MyString
+  fl: MyString
+  fr: MyString
+  rri: MyString
+  rro: MyString
+  rli: MyString
+  rlo: MyString
+  fatigue: MyString
+
+two:
+  make: MyString
+  model: MyString
+  slno: MyString
+  location: MyString
+  fl: MyString
+  fr: MyString
+  rri: MyString
+  rro: MyString
+  rli: MyString
+  rlo: MyString
+  fatigue: MyString

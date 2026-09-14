@@ -3,50 +3,35 @@ module Authentication
 
   included do
     before_action :require_authentication
-    helper_method :authenticated?
-  end
-
-  class_methods do
-    def allow_unauthenticated_access(**options)
-      skip_before_action :require_authentication, **options
-    end
   end
 
   private
-    def authenticated?
-      resume_session
+
+  def require_authentication
+    token = request.headers["Authorization"]&.sub("Bearer ", "")
+
+    if token.blank?
+      render json: {
+        error: "Authentication required"
+      }, status: :unauthorized
+
+      return
     end
 
-    def require_authentication
-      resume_session || request_authentication
-    end
+    begin
+      session = Session.find_signed!(
+        token,
+        purpose: :api_auth
+      )
 
-    def resume_session
-      Current.session ||= find_session_by_cookie
-    end
+      Current.session = session
 
-    def find_session_by_cookie
-      Session.find_by(id: cookies.signed[:session_id]) if cookies.signed[:session_id]
-    end
+    rescue ActiveSupport::MessageVerifier::InvalidSignature,
+           ActiveRecord::RecordNotFound
 
-    def request_authentication
-      session[:return_to_after_authenticating] = request.url
-      redirect_to new_session_path
+      render json: {
+        error: "Invalid or expired token"
+      }, status: :unauthorized
     end
-
-    def after_authentication_url
-      session.delete(:return_to_after_authenticating) || root_url
-    end
-
-    def start_new_session_for(user)
-      user.sessions.create!(user_agent: request.user_agent, ip_address: request.remote_ip).tap do |session|
-        Current.session = session
-        cookies.signed.permanent[:session_id] = { value: session.id, httponly: true, same_site: :lax }
-      end
-    end
-
-    def terminate_session
-      Current.session.destroy
-      cookies.delete(:session_id)
-    end
+  end
 end

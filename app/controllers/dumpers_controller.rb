@@ -1,5 +1,5 @@
 class DumpersController < ApplicationController
-	before_action :require_authentication
+
 	before_action :require_admin, only: %i[create update destroy]
 	
 	def index
@@ -45,7 +45,7 @@ class DumpersController < ApplicationController
 	end
 
 	def dumper_params
-		params.require(:dumper).permit(:slno,:location,:make,:model,:fl,:fr,:rli,:rlo,:rri,:rro,:fatigue)
+		params.require(:dumper).permit(:slno)
 	end
 
 end
